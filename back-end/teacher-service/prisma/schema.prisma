@@ -1,0 +1,102 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Teacher {
+  id                   String                @id @default(uuid())
+  firstName            String                @map("first_name")
+  lastName             String                @map("last_name")
+  dob                  DateTime              
+  gender               Gender
+  startDate            DateTime              @map("start_date")
+  imageUrl             String?               @map("image_url")
+  address              String
+  createdAt            DateTime              @default(now()) @map("created_at")
+  updatedAt            DateTime              @updatedAt @map("updated_at")
+  department           Department?
+  departmentTeachers   DepartmentTeacher[]
+  teacherClassSubjects TeacherClassSubject[]
+
+  @@map("teachers")
+}
+
+model AvailableTeacherSubject {
+  id                  String            @id @default(uuid())
+  subjectId           String            @map("subject_id")
+  createdAt           DateTime          @default(now()) @map("created_at")
+  updatedAt           DateTime          @updatedAt @map("updated_at")
+  departmentTeacher   DepartmentTeacher @relation(fields: [departmentTeacherId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  departmentTeacherId String            @map("teacher_id")
+
+  @@unique([departmentTeacherId, subjectId])
+  @@map("available_teacher_subjects")
+}
+
+model TeacherClassSubject { 
+  id             String   @id @default(uuid())
+  classSubjectId String   @map("subject_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+  teacher        Teacher  @relation(fields: [teacherId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  teacherId      String   @map("teacher_id")
+
+  @@unique([teacherId, classSubjectId])
+  @@map("teacher_class_subjects")
+}
+
+model DepartmentTeacher {
+  id                String                    @id @default(uuid())
+  department        Department                @relation(fields: [departmentId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  departmentId      String                    @map("department_id")
+  teacher           Teacher                   @relation(fields: [teacherId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  teacherId         String                    @map("teacher_id")
+  createdAt         DateTime                  @default(now()) @map("created_at")
+  updatedAt         DateTime                  @updatedAt @map("updated_at")
+  availableSubjects AvailableTeacherSubject[]
+
+  @@unique([departmentId, teacherId])
+  @@map("department_teachers")
+}
+
+model Department {
+  id                 String              @id @default(uuid())
+  name               String              @unique
+  description        String?
+  createdAt          DateTime            @default(now()) @map("created_at")
+  udpatedAt          DateTime            @updatedAt @map("updated_at")
+  headTeacher        Teacher?            @relation(fields: [headTeacherId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  headTeacherId      String?             @unique @map("head_teacher_id")
+  deparmentSubjects  DepartmentSubject[]
+  departmentTeachers DepartmentTeacher[]
+
+  @@map("departments")
+}
+
+model DepartmentSubject {
+  id           String     @id @default(uuid())
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+  subjectId    String     @map("subject_id")
+  department   Department @relation(fields: [departmentId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  departmentId String     @map("department_id")
+
+  @@unique([departmentId, subjectId])
+  @@map("department_subjects")
+}
+
+enum Gender {
+  Male
+  Female
+}

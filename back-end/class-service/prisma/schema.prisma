@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Class {
+  id             String         @id @default(uuid())
+  name           String
+  roomCode       String         @map("room_code")
+  capacity       Int
+  status         Status
+  levelId        String         @map("level_id")
+  formTeacherId  String         @map("form_teacher_id")
+  academicYearId String         @map("academic_year_id")
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+  classSubject   ClassSubject[]
+  classStudent   ClassStudent[]
+
+  @@unique([name, academicYearId])
+  @@unique([roomCode, academicYearId])
+  @@unique([academicYearId, formTeacherId])
+  @@map("classes")
+}
+
+model ClassStudent {
+  id        String   @id @default(uuid())
+  studentId String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt
+  class     Class    @relation(fields: [classId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  classId   String   @map("class_id")
+
+  @@unique([classId, studentId]) 
+  @@map("class_student")
+}
+
+model ClassSubject {
+  id         String    @id @default(uuid())
+  status     Status    @default(Active)
+  startDate  DateTime? @map("start_date")
+  endDate    DateTime? @map("end_date")
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  subjectId  String    @map("subject_id")
+  semesterId String    @map("semester_id")
+  class      Class     @relation(fields: [classId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  classId    String    @map("class_id")
+
+  @@unique([semesterId, classId, subjectId]) 
+  @@map("class_subject")
+}
+
+enum Status {
+  Active
+  Inactive
+}

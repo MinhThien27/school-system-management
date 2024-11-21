@@ -1,0 +1,1 @@
+export { RequestTimeoutRpcException } from './request-timout-rpc.exception';

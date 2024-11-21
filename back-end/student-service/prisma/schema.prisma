@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Student {
+  id             String         @id @default(uuid())
+  firstName      String         @map("first_name")
+  lastName       String         @map("last_name")
+  dob            DateTime       
+  gender         Gender
+  enrollmentDate DateTime       @map("enrollment_date") 
+  imageUrl       String?        @map("image_url")
+  address        String
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+  studentDetail  StudentDetail?
+  parents        Parent[]
+  grades         Grade[]
+
+  @@map("students")
+}
+
+model StudentDetail {
+  id           String  @id @default(uuid())
+  hobbies      String?
+  achievements String?
+  student      Student @relation(fields: [studentId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  studentId    String  @unique @map("student_id")
+
+  @@map("student_details")
+}
+
+model Parent {
+  id          String   @id @default(uuid())
+  firstName   String   @map("first_name")
+  lastName    String   @map("last_name")
+  dob         DateTime 
+  email       String?
+  phoneNumber String?  @map("phone_number")
+  student     Student  @relation(fields: [studentId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  studentId   String   @map("student_id")
+
+  @@map("parents")
+}
+
+// Note
+model Grade {
+  id             String  @id @default(uuid())
+  oralTest       Float?  @map("oral_test")
+  smallTest      Float?  @map("small_test")
+  bigTest        Float?  @map("big_test")
+  midtermExam    Float?  @map("midterm_exam")
+  finalExam      Float?  @map("final_exam")
+  subjectAverage Float?  @map("subject_average")
+  classSubjectId String  @map("class_subject_id")
+  student        Student @relation(fields: [studentId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  studentId      String  @map("student_id")
+
+  @@unique([classSubjectId, studentId])
+  @@map("grades")
+}
+
+enum Gender {
+  Male
+  Female
+}

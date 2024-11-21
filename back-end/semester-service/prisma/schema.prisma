@@ -1,0 +1,52 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model AcademicYear {
+  id                String     @id @default(uuid())
+  name              String     @unique
+  numberOfSemesters Int        @map("number_of_semesters")
+  startDate         DateTime   @map("start_date")
+  endDate           DateTime   @map("end_date")
+  status            Status
+  createdAt         DateTime   @default(now()) @map("created_at")
+  updatedAt         DateTime   @updatedAt
+  semesters         Semester[]
+
+  @@unique([startDate, endDate])
+  @@map("academic_years")
+}
+
+model Semester {
+  id             String       @id @default(uuid())
+  name           String      
+  semesterNumber Int          @map("semester_number")
+  startDate      DateTime     @map("start_date")
+  endDate        DateTime     @map("end_date")
+  status         Status
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+  academicYear   AcademicYear @relation(fields: [academicYearId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  academicYearId String       @map("academic_year_id")
+
+  @@unique([semesterNumber, academicYearId])
+  @@unique([startDate, endDate, academicYearId])
+  @@map("semesters")
+}
+
+enum Status {
+  Active
+  Inactive
+}

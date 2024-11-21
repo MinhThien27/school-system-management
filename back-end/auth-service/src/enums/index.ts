@@ -1,0 +1,1 @@
+export { FilterRule } from './filter-rule.enum';

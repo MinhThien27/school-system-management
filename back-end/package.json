@@ -1,0 +1,25 @@
+{
+  "name": "school-management-system",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "api-gateway": "cd api-gateway && npm run start:dev",
+    "auth-service": "cd auth-service && npm run start:dev",
+    "class-service": "cd class-service && npm run start:dev",
+    "image-service": "cd image-service && npm run start:dev",
+    "semester-service": "cd semester-service && npm run start:dev",
+    "student-service": "cd student-service && npm run start:dev",
+    "subject-service": "cd subject-service && npm run start:dev",
+    "teacher-service": "cd teacher-service && npm run start:dev",
+    "curriculum-service": "cd curriculum-service && npm run start:dev",
+    "configuration-service": "cd configuration-service && npm run start:dev",
+    "start": "concurrently \"npm run api-gateway\" \"npm run auth-service\" \"npm run class-service\" \"npm run image-service\" \"npm run semester-service\" \"npm run student-service\" \"npm run subject-service\" \"npm run teacher-service\" \"npm run curriculum-service\" \"npm run configuration-service\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.0.1"
+  }
+}

@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "teachers" ALTER COLUMN "dob" DROP DEFAULT,
+ALTER COLUMN "start_date" DROP DEFAULT;
